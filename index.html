@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Menu Hemat Tinggi Protein</title>
+<meta name="theme-color" content="#1f6f4a">
+<meta name="description" content="Perencana menu harian hemat, tinggi protein, mudah dimasak, dengan penyesuaian harga per provinsi.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#f2f6f1;--fg:#16301f;--card:#fff;--mut:#5b6e61;--ac:#1f6f4a;--hi:#e0a410;--ok:#1f6f4a;--bad:#b3261e;--bd:#d6e0d6}
+@media(prefers-color-scheme:dark){:root{--bg:#101a14;--fg:#e6efe8;--card:#18251d;--mut:#98ab9e;--ac:#5fc08f;--hi:#f0b82c;--ok:#5fc08f;--bad:#ff8a80;--bd:#2a3b30}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 "Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:780px;margin:0 auto;padding:16px;padding-top:max(16px,env(safe-area-inset-top));padding-bottom:max(16px,env(safe-area-inset-bottom))}
+h1{font-size:26px;font-weight:800;margin:8px 0 2px}.sub{color:var(--mut);margin:0 0 16px}
+.set{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px}
+label{font-size:12px;color:var(--mut);display:block;font-weight:600}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--fg);font:inherit}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.st{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:8px 10px}
+.st b{display:block;font-size:15px}.st span{font-size:11px;color:var(--mut)}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+button{padding:9px 12px;border:1px solid var(--bd);background:var(--card);color:var(--fg);border-radius:8px;font:inherit;font-weight:600;cursor:pointer}
+.tabs button{flex:1}.tabs button.on,button.pri{background:var(--ac);color:#fff;border-color:var(--ac)}
+@media(prefers-color-scheme:dark){.tabs button.on,button.pri{color:#0b140f}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+.hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}.hd h2{margin:0;font-size:18px;font-weight:800}
+.bar{height:10px;background:var(--bd);border-radius:6px;margin:8px 0 4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--hi);border-radius:6px}.bar.over i{background:var(--bad)}
+.note{font-size:12px;color:var(--mut)}.ok{color:var(--ok)}.bad{color:var(--bad)}
+.meal{border-top:1px solid var(--bd);padding-top:10px;margin-top:10px}.meal p{margin:6px 0 2px;font-size:13px}.meal small{color:var(--mut);display:block}
+table{width:100%;border-collapse:collapse}td,th{padding:8px 6px;border-bottom:1px solid var(--bd);text-align:left;font-size:14px}td:last-child,th:last-child{text-align:right}
+td input{max-width:110px}
+.row{display:grid;grid-template-columns:1fr 90px auto;gap:6px;margin-top:6px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+footer{color:var(--mut);font-size:12px;margin:18px 0}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--hi);outline-offset:2px}
+@media(max-width:560px){.stats,.set{grid-template-columns:repeat(2,1fr)}}
+#prt{display:none}
+@media print{body{background:#fff!important}main>h1,.sub,#app,footer{display:none}#prt{display:block}#prt,#prt *{color:#000!important;background:#fff!important}
+#prt h2,#prt h3{margin:10px 0 4px}#prt h3{break-after:avoid}#prt table{break-inside:avoid;margin-bottom:6px}#prt td,#prt th{font-size:12px;padding:3px 5px;border-color:#999}}
+</style>
+</head>
+<body>
+<main>
+<h1>Menu Hemat Tinggi Protein</h1>
+<p class="sub">Atur budget, pilih atau buat menu, lalu cetak menu dan daftar belanja.</p>
+<div id="app"></div>
+<section id="prt"></section>
+<footer>Aplikasi open source berlisensi MIT. Harga provinsi adalah indeks perkiraan kasar (bukan data resmi) dan nilai protein adalah estimasi; bukan pengganti saran ahli gizi. Data tersimpan di browser Anda.</footer>
+</main>
+<script>
+const I={nasi:["Nasi putih","porsi",2000,4],telur:["Telur ayam","butir",2000,6],tempe:["Tempe","potong 50 g",1200,9],tahu:["Tahu putih","biji",700,3],ayam:["Dada ayam fillet","100 g",3800,22],hati:["Hati ayam","100 g",2500,17],lele:["Ikan lele","100 g",3000,15],tongkol:["Ikan tongkol","100 g",3500,22],teri:["Ikan teri kering","20 g",2000,12],kh:["Kacang hijau","50 g",1500,11],kt:["Kacang tanah","50 g",1500,12],bayam:["Bayam","100 g",1200,2],kangkung:["Kangkung","100 g",1200,3],sawi:["Sawi hijau","100 g",1200,2],buncis:["Buncis","100 g",1500,2],tauge:["Tauge","100 g",800,3],kol:["Kol","100 g",800,1],bumbu:["Bumbu dapur","paket",2000,0],minyak:["Minyak goreng","50 ml",1000,0],pisang:["Pisang","buah",1500,1]};
+// Menu bawaan: [nama, "idBahan:jumlah ...", cara singkat]. Harga dasar = perkiraan Jawa Barat.
+const M={
+S:[["Nasi goreng telur + sawi","nasi:1 telur:2 sawi:1 bumbu:1 minyak:1","Tumis bumbu, masukkan nasi, telur, sawi."],
+["Nasi telur dadar + tumis tauge","nasi:1 telur:2 tauge:1 bumbu:1 minyak:1","Goreng dadar, tumis tauge 2 menit."],
+["Nasi telur ceplok + tumis kol","nasi:1 telur:2 kol:1 bumbu:1 minyak:1","Ceplok telur, tumis kol bawang putih."],
+["Nasi orak-arik telur tahu","nasi:1 telur:2 tahu:2 bumbu:1 minyak:1","Hancurkan tahu, tumis dengan telur."],
+["Nasi pecel sederhana","nasi:1 kt:1 tauge:1 bayam:1 tempe:1 telur:1 bumbu:1","Rebus sayur, haluskan kacang jadi bumbu."],
+["Bubur ayam suwir + telur rebus","nasi:1 ayam:1 telur:1 bumbu:1","Masak nasi jadi bubur, taburi ayam suwir."],
+["Nasi tempe goreng + telur ceplok + tauge","nasi:1 tempe:2 telur:1 tauge:1 bumbu:1 minyak:1","Goreng tempe berbumbu, ceplok telur."],
+["Nasi uduk sederhana + telur + tempe orek","nasi:1 telur:1 tempe:2 bumbu:1 minyak:1","Masak nasi dengan salam dan bumbu, tumis tempe."],
+["Nasi bayam bening + telur rebus + tahu goreng","nasi:1 bayam:1 telur:2 tahu:2 bumbu:1 minyak:1","Rebus telur, goreng tahu, buat sayur bening."]],
+L:[["Ayam goreng kuning + tempe + bayam bening","nasi:1 ayam:1.5 tempe:2 bayam:1 bumbu:1 minyak:1","Ungkep ayam 15 menit lalu goreng."],
+["Pecel lele + tempe + tumis buncis","nasi:1 lele:2 tempe:1 buncis:1 bumbu:1 minyak:2","Lumuri lele kunyit-garam, goreng 10 menit."],
+["Tongkol balado + tahu + tumis kangkung","nasi:1 tongkol:2 tahu:3 kangkung:1 bumbu:1 minyak:1","Ungkep tongkol, tumis sambal balado."],
+["Sambal goreng hati + tempe + buncis","nasi:1 hati:2 tempe:2 buncis:1 bumbu:1 minyak:1","Rebus hati 10 menit, tumis sambal."],
+["Teri kacang + telur balado + tumis sawi","nasi:1 teri:1.5 telur:2 sawi:1 bumbu:1 minyak:1","Goreng teri renyah, telur rebus balado."],
+["Ayam suwir bumbu bali + buncis","nasi:1 ayam:1.5 buncis:1 bumbu:1 minyak:1","Rebus ayam, suwir, tumis sambal."],
+["Tongkol suwir pedas + tempe + tumis kol","nasi:1 tongkol:1.5 tempe:1 kol:1 bumbu:1 minyak:1","Rebus tongkol, suwir, tumis pedas."],
+["Semur ayam tahu + tumis sawi","nasi:1 ayam:1.5 tahu:2 sawi:1 bumbu:1 minyak:1","Masak ayam dan tahu dengan kecap manis."],
+["Gado-gado sederhana (tempe, tahu, telur)","nasi:1 kt:1 tempe:1 tahu:2 telur:1 tauge:1 kol:1 bumbu:1","Rebus sayur dan telur, siram bumbu kacang."]],
+D:[["Tahu telur kecap + tumis kangkung","nasi:1 tahu:3 telur:2 kangkung:1 bumbu:1 minyak:1","Masak tahu goreng dengan telur dan kecap."],
+["Sup tahu telur sawi + tempe","nasi:1 tahu:4 telur:1 tempe:1 sawi:1 bumbu:1 minyak:0.5","Rebus kaldu bawang, masukkan tahu, telur, sawi."],
+["Orek tempe + tahu + telur rebus + bayam","nasi:1 tempe:2 tahu:3 telur:1 bayam:1 bumbu:1 minyak:1","Tumis tempe tipis dengan kecap dan cabai."],
+["Sup ayam bening + tahu + sawi kol","nasi:1 ayam:1.5 tahu:3 sawi:1 kol:1 bumbu:1","Rebus ayam jahe, tambahkan sayur dan tahu."],
+["Ayam tumis jahe + tahu + kangkung","nasi:1 ayam:1.5 tahu:2 kangkung:1 bumbu:1 minyak:1","Tumis ayam dadu dengan jahe dan tahu."],
+["Perkedel tahu telur + bayam bening","nasi:1 tahu:4 telur:2 bayam:1 bumbu:1 minyak:1","Hancurkan tahu, campur telur, goreng."],
+["Lele goreng + tempe + tumis kangkung","nasi:1 lele:2 tempe:1 kangkung:1 bumbu:1 minyak:2","Goreng lele berbumbu, tumis kangkung."],
+["Ayam kecap + tempe + tumis buncis","nasi:1 ayam:1.5 buncis:1 tempe:1 bumbu:1 minyak:1","Masak ayam dengan kecap, goreng tempe."],
+["Pindang tongkol + tahu + sawi","nasi:1 tongkol:1.5 tahu:2 sawi:1 bumbu:1 minyak:0.5","Rebus tongkol dengan bumbu kuah kuning."]],
+C:[["Kacang tanah rebus + 2 pisang","kt:1 pisang:2","Rebus kacang tanah 30 menit."],
+["Bubur kacang hijau + telur rebus","kh:1 telur:1 pisang:1","Rebus kacang hijau 30-40 menit."],
+["Bubur kacang hijau + pisang","kh:1.5 pisang:1","Rebus hingga pecah, beri sedikit gula."],
+["Bubur kacang hijau + 2 pisang","kh:1 pisang:2","Rebus kacang hijau hingga empuk."],
+["Telur rebus 2 + pisang","telur:2 pisang:1","Rebus telur 10 menit."],
+["Tahu goreng + pisang","tahu:3 pisang:1 minyak:0.5","Goreng tahu hingga kekuningan."],
+["Kacang tanah rebus + telur rebus","kt:1 telur:1","Rebus keduanya bersamaan."],
+["Tempe mendoan + pisang","tempe:2 pisang:1 minyak:1","Celup tempe tipis ke adonan tepung, goreng."],
+["Bubur kacang hijau + 2 telur rebus","kh:1 telur:2","Rebus kacang hijau dan telur."]]};
+// Indeks harga kasar per provinsi terhadap Jawa Barat = 1. Bukan data resmi; ubah sesuai kenyataan atau cek PIHPS.
+const PVS="Aceh:1.05,Sumatera Utara:1.03,Sumatera Barat:1.03,Riau:1.05,Kepulauan Riau:1.1,Jambi:1.04,Sumatera Selatan:1.02,Bengkulu:1.04,Lampung:0.98,Kepulauan Bangka Belitung:1.08,DKI Jakarta:1.08,Jawa Barat:1,Banten:1.03,Jawa Tengah:0.95,DI Yogyakarta:0.97,Jawa Timur:0.96,Bali:1.05,Nusa Tenggara Barat:1.03,Nusa Tenggara Timur:1.15,Kalimantan Barat:1.08,Kalimantan Tengah:1.1,Kalimantan Selatan:1.05,Kalimantan Timur:1.12,Kalimantan Utara:1.18,Sulawesi Utara:1.05,Gorontalo:1.05,Sulawesi Tengah:1.05,Sulawesi Barat:1.05,Sulawesi Selatan:1,Sulawesi Tenggara:1.05,Maluku:1.15,Maluku Utara:1.15,Papua Barat:1.3,Papua Barat Daya:1.3,Papua:1.35,Papua Selatan:1.4,Papua Tengah:1.6,Papua Pegunungan:1.8";
+const PV=Object.fromEntries(PVS.split(",").map(s=>{const a=s.split(":");return[a[0],+a[1]]}));
+const TY=["Sarapan","Makan Siang","Makan Malam","Camilan"],KEY=["S","L","D","C"],DEFC=[0,1,0,2,3,5,6],K="menu-hemat-v2";
+let S={prov:"Jawa Barat",total:225000,days:5,target:75,prices:{},plan:[],cust:{S:[],L:[],D:[],C:[]},ing:{}},tab="menu",bv="all",B={n:"",k:"S",c:"",r:[["nasi",1]],e:-1};
+try{Object.assign(S,JSON.parse(localStorage.getItem(K)||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const rp=n=>"Rp "+Math.round(n).toLocaleString("id-ID");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const X=i=>I[i]||S.ing[i],MM=k=>M[k].concat(S.cust[k]||[]),fac=()=>PV[S.prov]||1;
+const P=i=>S.prices[i]??(I[i]?Math.round(I[i][2]*fac()/100)*100:S.ing[i][2]);
+const its=c=>c.l.map(z=>`${esc(X(z.i)[0])} ${z.q} ${esc(X(z.i)[1])}`).join(", ");
+function calc(m){let c=0,p=0,l=[];m[1].split(" ").forEach(t=>{const[i,q]=t.split(":");if(!X(i))return;c+=P(i)*q;p+=X(i)[3]*q;l.push({i,q:+q})});return{c,p,l}}
+function plan(d){const a=S.plan[d]||(S.plan[d]=[d,d,d,DEFC[d]]);a.forEach((x,k)=>{if(!(x<MM(KEY[k]).length))a[k]=0});return a}
+function day(d){let c=0,p=0,l=[];plan(d).forEach((x,k)=>{const r=calc(MM(KEY[k])[x]);c+=r.c;p+=r.p;l=l.concat(r.l)});return{c,p,l}}
+function setv(k,v){if(k=="prov"){S.prov=v;S.prices={}}else{v=+v||0;if(k=="days")v=Math.min(7,Math.max(1,Math.round(v)));S[k]=Math.max(0,v)}save();R()}
+function pick(d,k,v){plan(d)[k]=+v;save();R()}
+function price(i,v){S.prices[i]=Math.max(0,+v||0);save();R()}
+function go(t){syn();tab=t;R()}
+function auto(){const bd=S.total/S.days,used={},C=KEY.map(k=>MM(k).map(calc));S.plan=[];
+for(let d=0;d<S.days;d++){let best=null,bs=-1e12;
+for(let a=0;a<C[0].length;a++)for(let b=0;b<C[1].length;b++)for(let c=0;c<C[2].length;c++)for(let e=0;e<C[3].length;e++){
+const pl=[a,b,c,e];let cost=0,pro=0,rep=0;pl.forEach((x,k)=>{cost+=C[k][x].c;pro+=C[k][x].p;rep+=used[k+"_"+x]||0});
+const s=(cost<=bd?0:-1e6-cost)+Math.min(pro,S.target*1.4)-rep*12-(bd-cost>0?(bd-cost)/2000:0);
+if(s>bs){bs=s;best=pl}}
+best.forEach((x,k)=>used[k+"_"+x]=(used[k+"_"+x]||0)+1);S.plan[d]=best}
+save();R()}
+function syn(){const g=id=>document.getElementById(id);if(g("bn")){B.n=g("bn").value;B.c=g("bc").value;if(B.e<0)B.k=g("bk").value}}
+function rowi(j,f,v){syn();B.r[j][f]=f?(+v||0):v;R()}
+function rowdel(j){syn();B.r.splice(j,1);R()}
+function rowadd(){syn();B.r.push(["nasi",1]);R()}
+function newB(){B={n:"",k:"S",c:"",r:[["nasi",1]],e:-1};R()}
+function saveMenu(){syn();const r=B.r.filter(x=>x[1]>0);if(!B.n.trim()||!r.length){alert("Isi nama menu dan minimal satu bahan dengan jumlah lebih dari 0.");return}
+const m=[B.n.trim(),r.map(x=>x[0]+":"+x[1]).join(" "),B.c.trim()];if(B.e>=0)S.cust[B.k][B.e]=m;else S.cust[B.k].push(m);save();newB()}
+function edmenu(k,j){const m=S.cust[k][j];B={n:m[0],k,c:m[2]||"",r:m[1].split(" ").map(t=>{const a=t.split(":");return[a[0],+a[1]]}),e:j};R();scrollTo(0,0)}
+function delmenu(k,j){if(!confirm("Hapus menu ini?"))return;const q=KEY.indexOf(k),t=M[k].length+j;S.plan.forEach(a=>{if(a){if(a[q]==t)a[q]=0;else if(a[q]>t)a[q]--}});S.cust[k].splice(j,1);save();newB()}
+function addIng(){syn();const g=id=>document.getElementById(id).value.trim(),n=g("in"),u=g("iu");if(!n||!u){alert("Isi nama dan satuan bahan.");return}
+S.ing["c"+Date.now()]=[n,u,Math.max(0,+g("ip")||0),Math.max(0,+g("ig")||0)];save();R()}
+let ip=null;addEventListener("beforeinstallprompt",e=>{e.preventDefault();ip=e;R()});
+function exp(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:"application/json"}));a.download="menu-hemat-cadangan.json";a.click()}
+function imp(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(typeof o.total!="number")throw 0;Object.assign(S,o);S.cust=Object.assign({S:[],L:[],D:[],C:[]},S.cust);S.ing=S.ing||{};save();R();alert("Data berhasil dipulihkan.")}catch(e){alert("File cadangan tidak valid.")}};r.readAsText(f)}
+const tbl=a=>{let t=0;const r=Object.keys(a).map(i=>{const c=a[i]*P(i);t+=c;return`<tr><td>${esc(X(i)[0])}</td><td>${a[i]} ${esc(X(i)[1])}</td><td>${rp(c)}</td></tr>`}).join("");return`<table><tr><th>Bahan</th><th>Jumlah</th><th>Biaya</th></tr>${r}<tr><th>Total</th><th></th><th>${rp(t)}</th></tr></table>`};
+function R(){
+if(bv!="all"&&bv>=S.days)bv="all";
+const bd=S.total/S.days,all=Object.keys(I).concat(Object.keys(S.ing));let tc=0,tp=0,ag={};
+const ds=[...Array(S.days).keys()].map(d=>{const r=day(d);tc+=r.c;tp+=r.p;r.l.forEach(x=>ag[x.i]=(ag[x.i]||0)+x.q);return r});
+const opts=(sel)=>all.map(i=>`<option value="${i}"${i==sel?" selected":""}>${esc(X(i)[0])} (${esc(X(i)[1])})</option>`).join("");
+let h=`<div class="set"><div><label for="v">Provinsi</label><select id="v" onchange="setv('prov',this.value)">${Object.keys(PV).map(p=>`<option${p==S.prov?" selected":""}>${p}</option>`).join("")}</select></div>
+<div><label for="t">Total budget (Rp)</label><input id="t" type="number" min="0" step="5000" value="${S.total}" onchange="setv('total',this.value)"></div>
+<div><label for="n">Jumlah hari (1-7)</label><input id="n" type="number" min="1" max="7" value="${S.days}" onchange="setv('days',this.value)"></div>
+<div><label for="g">Target protein/hari (g)</label><input id="g" type="number" min="0" value="${S.target}" onchange="setv('target',this.value)"></div></div>
+<div class="stats"><div class="st"><b>${rp(bd)}</b><span>Budget per hari</span></div><div class="st"><b>${rp(tc)}</b><span>Total belanja</span></div>
+<div class="st"><b class="${tc>S.total?"bad":"ok"}">${rp(S.total-tc)}</b><span>Sisa budget</span></div><div class="st"><b>${Math.round(tp/S.days)} g</b><span>Protein rata-rata/hari</span></div></div>
+<div class="tabs">${[["menu","Menu"],["belanja","Belanja"],["buat","Menu Saya"],["harga","Harga"]].map(t=>`<button class="${tab==t[0]?"on":""}" onclick="go('${t[0]}')">${t[1]}</button>`).join("")}<button onclick="window.print()">Cetak</button>${ip?`<button class="pri" onclick="ip.prompt();ip=null;R()">Pasang aplikasi</button>`:""}</div>`;
+if(tab=="menu"){h+=`<div class="acts"><button class="pri" onclick="auto()">Susun otomatis sesuai budget</button><span class="note">Memilih menu dengan protein terbaik yang muat di budget harian dan tidak berulang.</span></div>`;
+h+=ds.map((r,d)=>`<div class="card"><div class="hd"><h2>Hari ${d+1}</h2><span class="${r.c>bd?"bad":"ok"}">${rp(r.c)} dari ${rp(bd)}</span></div>
+<div class="bar ${r.c>bd?"over":""}"><i style="width:${Math.min(100,r.c/bd*100)}%"></i></div>
+<div class="note ${r.p>=S.target?"ok":"bad"}">Protein ${Math.round(r.p)} g ${r.p>=S.target?"(target tercapai)":"(di bawah target)"}</div>
+${plan(d).map((x,k)=>{const m=MM(KEY[k])[x],c=calc(m);return`<div class="meal"><label for="m${d}${k}">${TY[k]}</label><select id="m${d}${k}" onchange="pick(${d},${k},this.value)">${MM(KEY[k]).map((o,j)=>`<option value="${j}"${j==x?" selected":""}>${esc(o[0])}</option>`).join("")}</select>
+<p>${its(c)}</p><small>${esc(m[2]||"")} Biaya ${rp(c.c)}, protein ${Math.round(c.p)} g.</small></div>`}).join("")}</div>`).join("")}
+if(tab=="belanja"){const a=bv=="all"?ag:ds[bv].l.reduce((o,x)=>(o[x.i]=(o[x.i]||0)+x.q,o),{});
+h+=`<div class="card"><label for="bs">Tampilkan</label><select id="bs" onchange="bv=this.value;R()"><option value="all">Total semua hari</option>${ds.map((_,d)=>`<option value="${d}"${bv==d&&bv!="all"?" selected":""}>Hari ${d+1}</option>`).join("")}</select>${tbl(a)}<p class="note">Nasi: beli beras sekitar 100 g per porsi.</p></div>`}
+if(tab=="buat"){let c=0,p=0;B.r.forEach(x=>{if(X(x[0])){c+=P(x[0])*x[1];p+=X(x[0])[3]*x[1]}});
+h+=`<div class="card"><h2 style="font-size:17px;margin:0 0 8px">${B.e>=0?"Ubah menu":"Buat menu baru"}</h2>
+<label for="bn">Nama menu</label><input id="bn" value="${esc(B.n)}" placeholder="contoh: Ayam penyet + lalapan">
+<div class="g2"><div><label for="bk">Waktu makan</label><select id="bk"${B.e>=0?" disabled":""}>${KEY.map((k,i)=>`<option value="${k}"${B.k==k?" selected":""}>${TY[i]}</option>`).join("")}</select></div>
+<div><label for="bc">Cara olah singkat</label><input id="bc" value="${esc(B.c)}"></div></div>
+<label style="margin-top:10px">Bahan dan jumlah</label>
+${B.r.map((x,j)=>`<div class="row"><select aria-label="Bahan" onchange="rowi(${j},0,this.value)">${opts(x[0])}</select><input aria-label="Jumlah" type="number" min="0" step="0.5" value="${x[1]}" onchange="rowi(${j},1,this.value)"><button onclick="rowdel(${j})">Hapus</button></div>`).join("")}
+<div class="acts"><button onclick="rowadd()">Tambah bahan</button></div>
+<p class="note">Perkiraan biaya <b>${rp(c)}</b>, protein <b>${Math.round(p)} g</b> (harga provinsi ${esc(S.prov)}). Bandingkan dengan budget harian ${rp(bd)}.</p>
+<div class="acts"><button class="pri" onclick="saveMenu()">Simpan menu</button>${B.e>=0?`<button onclick="newB()">Batal</button>`:""}</div></div>
+<div class="card"><h2 style="font-size:17px;margin:0 0 8px">Menu saya</h2>${KEY.map((k,i)=>S.cust[k].map((m,j)=>{const c=calc(m);return`<div class="meal"><b>${esc(m[0])}</b> <span class="note">(${TY[i]})</span><small>${its(c)} - ${rp(c.c)}, ${Math.round(c.p)} g protein</small><div class="acts"><button onclick="edmenu('${k}',${j})">Ubah</button><button onclick="delmenu('${k}',${j})">Hapus</button></div></div>`}).join("")).join("")||`<p class="note">Belum ada menu buatan sendiri. Menu yang Anda simpan muncul di pilihan menu harian.</p>`}</div>
+<div class="card"><h2 style="font-size:17px;margin:0 0 8px">Tambah bahan sendiri</h2><div class="g2"><div><label for="in">Nama bahan</label><input id="in"></div><div><label for="iu">Satuan</label><input id="iu" placeholder="100 g"></div><div><label for="ip">Harga per satuan (Rp)</label><input id="ip" type="number" min="0"></div><div><label for="ig">Protein per satuan (g)</label><input id="ig" type="number" min="0"></div></div><div class="acts"><button onclick="addIng()">Tambah bahan</button></div></div>`}
+if(tab=="harga")h+=`<div class="card"><p class="note">Harga dasar adalah perkiraan Jawa Barat dikali indeks ${esc(S.prov)} (x${fac()}). Indeks ini perkiraan kasar, bukan data resmi: ubah harga sesuai pasar Anda atau cek PIHPS (Bank Indonesia). Mengganti provinsi mengatur ulang harga manual.</p><table><tr><th>Bahan per satuan</th><th>Harga (Rp)</th><th>Protein</th></tr>${all.map(i=>`<tr><td>${esc(X(i)[0])} <span class="note">/ ${esc(X(i)[1])}</span></td><td><input aria-label="Harga ${esc(X(i)[0])}" type="number" min="0" value="${P(i)}" onchange="price('${i}',this.value)"></td><td>${X(i)[3]} g</td></tr>`).join("")}</table>
+<div class="acts"><button onclick="S.prices={};save();R()">Kembalikan harga awal provinsi</button></div></div>
+<div class="card"><h2 style="font-size:17px;margin:0 0 8px">Cadangan data</h2><p class="note">Simpan menu, bahan, harga, dan pengaturan ke file, atau pulihkan dari file cadangan.</p><div class="acts"><button onclick="exp()">Unduh cadangan</button></div><label for="rf">Pulihkan dari file cadangan</label><input id="rf" type="file" accept="application/json" onchange="imp(this.files[0])"></div>`;
+document.getElementById("app").innerHTML=h;
+document.getElementById("prt").innerHTML=`<h2>Rencana Menu ${S.days} Hari - ${esc(S.prov)}</h2><p>Budget ${rp(S.total)} (${rp(bd)} per hari). Perkiraan belanja ${rp(tc)}.</p>`+ds.map((r,d)=>`<h3>Hari ${d+1} - ${rp(r.c)}, protein ${Math.round(r.p)} g</h3><table>${plan(d).map((x,k)=>{const m=MM(KEY[k])[x],c=calc(m);return`<tr><td>${TY[k]}</td><td>${esc(m[0])}<br><small>${its(c)}</small></td><td>${rp(c.c)}</td></tr>`}).join("")}</table>`).join("")+`<h3>Daftar belanja total</h3>`+tbl(ag)}
+R();
+if("serviceWorker"in navigator&&location.protocol.indexOf("http")==0)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
